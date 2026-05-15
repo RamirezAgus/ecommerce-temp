@@ -1,15 +1,17 @@
 import Image from "next/image";
+import Link from "next/link";
 
 type Product = {
   id: string;
   name: string;
-  subtitle: string;
+  subtitle: string | null;
   price: number;
   image: string;
 };
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
+    <Link href={`/product/${product.id}`}>
     <div className="group cursor-pointer">
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-card">
         <Image
@@ -29,5 +31,6 @@ export default function ProductCard({ product }: { product: Product }) {
         </p>
       </div>
     </div>
+    </Link>
   );
 }

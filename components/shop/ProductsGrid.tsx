@@ -1,34 +1,14 @@
 import ProductCard from "@/components/product/ProductCard";
+import { getProducts } from "@/lib/products";
 
-const products = [
-  {
-    id: "1",
-    name: "Nordic Chair",
-    subtitle: "Minimal design",
-    price: 180,
-    image: "/prod1.png",
-  },
-  {
-    id: "2",
-    name: "Modern Lamp",
-    subtitle: "Soft lighting",
-    price: 95,
-    image: "/prod2.png",
-  },
-  {
-    id: "3",
-    name: "Wood Table",
-    subtitle: "Natural finish",
-    price: 320,
-    image: "/prod1.png",
-  },
-];
 
-export default function ProductsGrid() {
+export default async function ProductsGrid() {
+  const products = await getProducts();
+
   return (
     <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-6">
-      {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );

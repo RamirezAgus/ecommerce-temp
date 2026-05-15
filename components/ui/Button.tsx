@@ -1,25 +1,29 @@
-type ButtonProps = {
-    children: React.ReactNode;
-    variant?: "primary" | "secondary" | "outline";
-    classname?: string;
+import { ButtonHTMLAttributes } from "react";
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "default" | "outline";
 };
 
 export default function Button({
-    children,
-    variant = "primary",
-    classname = "",
+  children,
+  variant = "default",
+  className = "",
+  ...props
 }: ButtonProps) {
-    const  base = "px-4 py-2 rounded-lg text-sm font-medium transition";
-
-    const variants = {
-        primary: "bg-primary text-white hover:opacity-90",
-        secondary: "bg-secondary text-white hover:opacity-90",
-        outline: "border border-neutral/30 text-secondary hover:bg-gray-100",
-    };
-
-    return (
-        <button className={`${base} ${variants[variant]} ${classname}`}>
-            {children}
-        </button>
-    )
+  return (
+    <button
+      className={`
+        px-4 py-2 rounded-lg text-sm font-medium transition
+        ${
+          variant === "default"
+            ? "bg-primary text-white hover:opacity-90"
+            : "border border-border text-foreground hover:bg-muted"
+        }
+        ${className}
+      `}
+      {...props} // 👈 CLAVE
+    >
+      {children}
+    </button>
+  );
 }
