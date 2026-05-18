@@ -1,24 +1,55 @@
-export default function FiltersSidebar() {
-  return (
-    <aside className="lg:col-span-1 space-y-6">
-      <div>
-        <h3 className="font-medium text-foreground mb-3">Category</h3>
-        <div className="space-y-2 text-sm text-muted">
-          <label className="flex gap-2">
-            <input type="checkbox" /> All
-          </label>
-          <label className="flex gap-2">
-            <input type="checkbox" /> Apparel
-          </label>
-          <label className="flex gap-2">
-            <input type="checkbox" /> Accessories
-          </label>
-        </div>
-      </div>
+import Link from "next/link";
 
+type Category = {
+  id: string;
+  name: string;
+};
+
+type Props = {
+  categories: Category[];
+
+  currentCategory?: string;
+};
+
+export default function FiltersSidebar({
+  categories,
+  currentCategory,
+}: Props) {
+  return (
+    <aside className="space-y-6">
       <div>
-        <h3 className="font-medium text-foreground mb-3">Price</h3>
-        <input type="range" className="w-full" />
+        <h2 className="text-lg font-semibold mb-4">
+          Categories
+        </h2>
+
+        <div className="flex flex-col gap-3">
+          {/* All */}
+          <Link
+            href="/shop"
+            className={
+              !currentCategory
+                ? "text-primary font-medium"
+                : "text-muted hover:text-foreground"
+            }
+          >
+            All
+          </Link>
+
+          {/* Categories */}
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/shop?category=${category.name}`}
+              className={
+                currentCategory === category.name
+                  ? "text-primary font-medium"
+                  : "text-muted hover:text-foreground"
+              }
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
       </div>
     </aside>
   );

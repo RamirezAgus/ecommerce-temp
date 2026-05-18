@@ -2,8 +2,33 @@ import Container from "@/components/ui/Container";
 import FiltersSidebar from "@/components/shop/FiltersSidebar";
 import ProductsGrid from "@/components/shop/ProductsGrid";
 import SortBar from "@/components/shop/SortBar";
+import { prisma } from "@/lib/prisma";
 
-export default function ShopPage() {
+type Props = {
+  searchParams: Promise<{
+    category?: string;
+  }>;
+};
+
+export default async function ShopPage({ searchParams }: Props) {
+  const { category } = await searchParams;
+
+  const products = await prisma.product.findMany({
+    where: category
+      ? {
+          category: {
+            name: category,
+          },
+        }
+      : undefined,
+
+    include: {
+      category: true,
+    },
+  });
+
+  const categories = await prisma.category.findMany();
+
   return (
     <Container>
       <div className="py-10">
@@ -17,8 +42,8 @@ export default function ShopPage() {
         <SortBar />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-6">
-            <FiltersSidebar />
-            <ProductsGrid />
+          <FiltersSidebar categories={categories} currentCategory={category} />
+          <ProductsGrid products={products} />
         </div>
       </div>
     </Container>

@@ -26,9 +26,11 @@ model Product {
 }
 
 model Category {
-  id        String    @id @default(cuid())
+   id        String    @id @default(cuid())
 
   name      String    @unique
+
+  image     String?
 
   products  Product[]
 }
