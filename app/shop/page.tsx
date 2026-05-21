@@ -1,26 +1,50 @@
 import Container from "@/components/ui/Container";
 import FiltersSidebar from "@/components/shop/FiltersSidebar";
 import ProductsGrid from "@/components/shop/ProductsGrid";
-import SortBar from "@/components/shop/SortBar";
+import SearchAndSort from "@/components/shop/SearchAndSort";
 import { prisma } from "@/lib/prisma";
 
 type Props = {
   searchParams: Promise<{
     category?: string;
+    q?: string;
+    sort?: string;
   }>;
 };
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { category } = await searchParams;
+  const { category, q, sort } = await searchParams;
 
   const products = await prisma.product.findMany({
-    where: category
-      ? {
-          category: {
-            name: category,
-          },
-        }
-      : undefined,
+    where: {
+      ...(category && {
+        category: {
+          name: category,
+        },
+      }),
+
+      ...(q && {
+        name: {
+          contains: q,
+          mode: "insensitive",
+        },
+      }),
+    },
+
+    orderBy:
+      sort === "price-asc"
+        ? {
+            price: "asc",
+          }
+        : sort === "price-desc"
+          ? {
+              price: "desc",
+            }
+          : sort === "newest"
+            ? {
+                createdAt: "desc",
+              }
+            : undefined,
 
     include: {
       category: true,
@@ -39,7 +63,7 @@ export default async function ShopPage({ searchParams }: Props) {
           </h1>
         </div>
 
-        <SortBar />
+        <SearchAndSort />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-6">
           <FiltersSidebar categories={categories} currentCategory={category} />

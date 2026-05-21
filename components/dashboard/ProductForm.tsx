@@ -1,4 +1,5 @@
 import { createProduct, updateProduct } from "@/actions/productActions";
+import MagneticButton from "@/components/ui/MagneticButton";
 import Image from "next/image";
 
 type Product = {
@@ -104,12 +105,12 @@ export default function ProductForm({ product, categories }: Props) {
           </div>
         )}
       </div>
-      <button
+      <MagneticButton
         type="submit"
-        className="bg-primary text-white px-6 py-3 rounded-lg"
+        className="bg-primary text-white px-6 py-3 rounded-xl"
       >
         {product ? "Update product" : "Create product"}
-      </button>
+      </MagneticButton>
     </form>
   );
 }

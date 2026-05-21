@@ -16,7 +16,9 @@ model Product {
 
   price       Float
 
-  image       String
+  images      Json
+
+  variants    Json?
 
   categoryId  String?
 

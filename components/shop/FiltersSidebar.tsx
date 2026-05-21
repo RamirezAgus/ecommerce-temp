@@ -11,16 +11,11 @@ type Props = {
   currentCategory?: string;
 };
 
-export default function FiltersSidebar({
-  categories,
-  currentCategory,
-}: Props) {
+export default function FiltersSidebar({ categories, currentCategory }: Props) {
   return (
     <aside className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-4">
-          Categories
-        </h2>
+        <h2 className="text-lg font-semibold mb-4">Categories</h2>
 
         <div className="flex flex-col gap-3">
           {/* All */}
@@ -40,11 +35,11 @@ export default function FiltersSidebar({
             <Link
               key={category.id}
               href={`/shop?category=${category.name}`}
-              className={
+              className={`transition-colors duration-200 ${
                 currentCategory === category.name
-                  ? "text-primary font-medium"
-                  : "text-muted hover:text-foreground"
-              }
+                  ? "text-primary font-semibold"
+                  : "text-[#7b6d60] hover:text-foreground"
+              }`}
             >
               {category.name}
             </Link>

@@ -1,52 +1,85 @@
 "use client";
 
-import Container from "../ui/Container";
 import Link from "next/link";
-import { ShoppingCart} from "lucide-react";
-import { useCartStore } from "@/store/cartStore";
+import Image from "next/image";
+import Container from "@/components/ui/Container";
+import CartDrawer from "@/components/cart/CartDrawer";
 import { UserButton, SignInButton, Show } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
-  const items = useCartStore((state) => state.items);
-  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
-    <header className="w-full border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
+    <motion.header
+      animate={{
+        backdropFilter: scrolled ? "blur(16px)" : "blur(6px)",
+        backgroundColor: scrolled
+          ? "rgba(248,243,238,0.82)"
+          : "rgba(248,243,238,0.55)",
+      }}
+      transition={{ duration: 0.3 }}
+      className="w-full border-stone-200 border-b bg-[#f8f3ee]/80 backdrop-blur-md sticky top-0 z-50"
+    >
       <Container>
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/">
-            <h1 className="text-xl font-bold text-foreground">LUXE</h1>
+          <Link href="/" className="relative flex items-center">
+            <div className="absolute inset-0 bg-linear-to-r from-amber-800/10 via-transparent to-amber-700/10 blur-2xl rounded-full" />
+            <Image
+              src="/logo.webp"
+              alt="Annette Tramas"
+              width={160}
+              height={60}
+              priority
+              className="relative
+              w-auto
+              h-15
+              rounded-md
+              object-contain
+              opacity-90
+              hover:opacity-100
+              transition-all
+              duration-300
+              drop-shadow-[0_2px_10px_rgba(120,72,32,0.22)]"
+            />
           </Link>
 
           {/* Nav */}
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted">
+          <nav className="hidden md:flex items-center gap-8 text-[13px] uppercase tracking-[0.18em] text-muted-foreground">
             <Link href="/shop" className="text-primary font-medium">
               Shop
             </Link>
             <Link
               href="/collections"
-              className="hover:text-foreground transition"
+              className="hover:text-foreground transition-colors"
             >
               Collections
             </Link>
-            <Link href="/about" className="hover:text-foreground transition">
+            <Link
+              href="/about"
+              className="hover:text-foreground transition-colors"
+            >
               About
             </Link>
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
-            <Link href="/cart">
-              <div className="relative cursor-pointer">
-                <ShoppingCart className="w-5 h-5 text-foreground cursor-pointer hover:opacity-70 transition" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {totalItems}
-                  </span>
-                )}
-              </div>
-            </Link>
+          <div className="flex items-center gap-5">
+            <CartDrawer />
             <Show
               when="signed-out"
               fallback={
@@ -54,22 +87,22 @@ export default function Navbar() {
                   <Link
                     href="/dashboard"
                     className="text-sm hover:opacity-70 transition"
-                    >
+                  >
                     Dashboard
                   </Link>
                   <UserButton />
                 </div>
               }
-              >
-                <SignInButton>
-                  <button className="text-sm hover:opacity-70 transition">
-                    Login
-                  </button>
-                </SignInButton>
+            >
+              <SignInButton>
+                <button className="text-sm hover:opacity-70 transition">
+                  Login
+                </button>
+              </SignInButton>
             </Show>
           </div>
         </div>
       </Container>
-    </header>
+    </motion.header>
   );
 }

@@ -1,43 +1,72 @@
-// components/home/Hero.tsx
+"use client";
+
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import MagneticButton from "@/components/ui/MagneticButton";
+import Link from "next/link";
 
 export default function Hero() {
+  const { scrollY } = useScroll();
+
+  const y = useTransform(scrollY, [0, 500], [0, 120]);
+
   return (
     <section className="section">
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-
           <div>
-            <p className="text-sm text-muted mb-3">
-              ELEVATE YOUR SPACE
-            </p>
+            <p className="text-sm text-muted mb-3">ELEVATE YOUR SPACE</p>
 
             <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
               Discover curated objects for modern living
             </h1>
 
             <p className="mt-4 text-muted max-w-md">
-              Explore our selection of premium lifestyle goods designed to enhance your everyday experience.
+              Explore our selection of premium lifestyle goods designed to
+              enhance your everyday experience.
             </p>
 
             <div className="flex gap-4 mt-6">
-              <Button>Shop Collection</Button>
+              <MagneticButton
+                className="bg-primary
+                text-white
+                  px-6
+                  py-3
+                  rounded-2xl"
+              >
+                <Link href="/shop">
+                  Shop Collection
+                </Link>
+              </MagneticButton>
               <Button variant="outline">Learn More</Button>
             </div>
           </div>
 
-          <div className="relative w-full h-100 md:h-125">
+          <motion.div
+            style={{ y }}
+            initial={{
+              opacity: 0,
+              scale: 1.03,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{
+              duration: 1,
+            }}
+            className="relative w-full h-100 md:h-125"
+          >
             <Image
-              src="/heroimg.png" // 👉 poné una imagen en /public
+              src="/heroimg.webp"
               alt="Hero product"
               fill
               className="object-cover rounded-xl"
               priority
             />
-          </div>
-
+          </motion.div>
         </div>
       </Container>
     </section>
