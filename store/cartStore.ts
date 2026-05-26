@@ -7,6 +7,7 @@ type CartItem = {
   price: number;
   image: string;
   quantity: number;
+  variant?: string | null;
 };
 
 type CartStore = {
@@ -63,7 +64,7 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: "cart-storage", // 👈 localStorage key
+      name: "cart-storage",
     },
   ),
 );

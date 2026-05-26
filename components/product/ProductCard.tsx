@@ -3,14 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Product } from "@/types/product";
 
-type Product = {
-  id: string;
-  name: string;
-  subtitle: string | null;
-  price: number;
-  images: string[];
-};
 
 export default function ProductCard({ product }: { product: Product }) {
   return (

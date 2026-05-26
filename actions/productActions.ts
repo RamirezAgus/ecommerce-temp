@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import cloudinary from "@/lib/cloudinary";
 
 export async function createProduct(formData: FormData) {
   const name = formData.get("name") as string;
@@ -16,37 +15,9 @@ export async function createProduct(formData: FormData) {
 
   const price = Number(formData.get("price"));
 
-  const imageFile = formData.get("image") as File;
+  const images = JSON.parse(formData.get("images") as string);
 
-  const bytes = await imageFile.arrayBuffer();
-
-  const buffer = Buffer.from(bytes);
-
-  const uploadResult = await new Promise<{
-    secure_url: string;
-  }>((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        {
-          folder: "annette-store",
-        },
-        (error, result) => {
-          if (error || !result) {
-            reject(error);
-            return;
-          }
-
-          resolve(
-            result as {
-              secure_url: string;
-            },
-          );
-        },
-      )
-      .end(buffer);
-  });
-
-  const image = uploadResult.secure_url;
+  const variants = JSON.parse(formData.get("variants") as string);
 
   await prisma.product.create({
     data: {
@@ -54,8 +25,9 @@ export async function createProduct(formData: FormData) {
       subtitle,
       description,
       price,
-      image,
+      images,
       categoryId,
+      variants,
     },
   });
 
@@ -77,6 +49,10 @@ export async function updateProduct(id: string, formData: FormData) {
 
   const price = Number(formData.get("price"));
 
+  const images = JSON.parse(formData.get("images") as string);
+
+  const variants = JSON.parse(formData.get("variants") as string);
+
   const existingProduct = await prisma.product.findUnique({
     where: {
       id,
@@ -87,59 +63,27 @@ export async function updateProduct(id: string, formData: FormData) {
     throw new Error("Product not found");
   }
 
-  let image = existingProduct.image;
-
-  const imageFile = formData.get("image") as File;
-
-  if (imageFile && imageFile.size > 0) {
-    const bytes = await imageFile.arrayBuffer();
-
-    const buffer = Buffer.from(bytes);
-
-    const uploadResult = await new Promise<{
-      secure_url: string;
-    }>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "annette-store",
-          },
-          (error, result) => {
-            if (error || !result) {
-              reject(error);
-              return;
-            }
-
-            resolve(
-              result as {
-                secure_url: string;
-              },
-            );
-          },
-        )
-        .end(buffer);
-    });
-
-    image = uploadResult.secure_url;
-  }
-
   await prisma.product.update({
     where: {
       id,
     },
+
     data: {
       name,
       subtitle,
       description,
       price,
-      image,
+      images,
       categoryId,
+      variants,
     },
   });
 
   revalidatePath("/dashboard/products");
 
   revalidatePath("/shop");
+
+  revalidatePath(`/product/${id}`);
 
   redirect("/dashboard/products");
 }
@@ -152,6 +96,7 @@ export async function deleteProduct(id: string) {
   });
 
   revalidatePath("/dashboard/products");
+
   revalidatePath("/shop");
 
   redirect("/dashboard/products");

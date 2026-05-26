@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import CartItem from "./CartItem";
 import MagneticButton from "@/components/ui/MagneticButton";
 
@@ -26,6 +25,26 @@ export default function CartDrawer() {
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
+
+  const handleCheckout = async () => {
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        items,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.init_point) {
+      window.location.href = data.init_point;
+    }
+  };
 
   return (
     <Sheet>
@@ -85,24 +104,21 @@ export default function CartDrawer() {
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
-          <MagneticButton>
-            <Link
-              href="/checkout"
-              className="flex
-                bg-primary
-              text-white
-                text-center
-                p-3
-                rounded-2xl
-                font-medium
-                transition-all
-                duration-200
-                hover:opacity-90
-                hover:scale-[1.01]
-                active:scale-[0.98]"
-            >
-              Go to Checkout
-            </Link>
+          <MagneticButton
+            onClick={handleCheckout}
+            className="
+            flex
+            w-full
+            justify-center
+            bg-primary
+            text-white
+            text-center
+            p-3
+            rounded-2xl
+            font-medium
+          "
+          >
+            Go to Checkout
           </MagneticButton>
         </div>
       </SheetContent>

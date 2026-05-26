@@ -1,21 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import { createProduct, updateProduct } from "@/actions/productActions";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { Product, Category, Variant } from "@/types/product";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Trash2 } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 import Image from "next/image";
-
-type Product = {
-  id: string;
-  name: string;
-  subtitle?: string | null;
-  description: string;
-  price: number;
-  image: string;
-  categoryId?: string | null;
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
 
 type Props = {
   product?: Product;
@@ -24,6 +20,10 @@ type Props = {
 
 export default function ProductForm({ product, categories }: Props) {
   const action = product ? updateProduct.bind(null, product.id) : createProduct;
+  const [images, setImages] = useState<string[]>(product?.images || []);
+  const [variants, setVariants] = useState<Variant[]>(
+    (product?.variants as Variant[]) || [],
+  );
 
   return (
     <form action={action} className="space-y-6">
@@ -86,24 +86,229 @@ export default function ProductForm({ product, categories }: Props) {
         </select>
       </div>
       <div>
-        <label className="block mb-2 text-sm font-medium">Image URL</label>
+        <label className="block mb-2 text-sm font-medium">Product Images</label>
+        <ImageUpload onUpload={(url) => setImages((prev) => [...prev, url])} />
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          {images.map((image) => (
+            <div
+              key={image}
+              className="
+                  relative
+                  aspect-square
+                  rounded-xl
+                  overflow-hidden
+                  border
+                "
+            >
+              <Image src={image} alt="Preview" fill className="object-cover" />
+            </div>
+          ))}
+        </div>
+        <input type="hidden" name="images" value={JSON.stringify(images)} />
+      </div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Variants</h3>
 
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          className="w-full border border-border rounded-lg px-4 py-3 bg-background"
-        />
-        {product?.image && (
-          <div className="relative w-32 h-32 mt-4">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover rounded-lg"
-            />
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={() =>
+              setVariants((prev) => [
+                ...prev,
+                {
+                  name: "",
+                  color: "#000000",
+                  stock: 0,
+                  images: [],
+                },
+              ])
+            }
+            className="
+                px-4
+                py-2
+                rounded-xl
+                bg-primary
+                text-white
+              "
+          >
+            Add Variant
+          </button>
+        </div>
+
+        {variants.map((variant, index) => (
+          <Collapsible
+            key={index}
+            className="
+                border
+                border-border
+                rounded-2xl
+                overflow-hidden
+              "
+          >
+            <CollapsibleTrigger
+              className="
+                  w-full
+                  flex
+                  items-center
+                  justify-between
+                  px-6
+                  py-4
+                  bg-card
+                  hover:bg-muted/50
+                  transition
+                "
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="
+                    w-6
+                    h-6
+                    rounded-full
+                    border
+                  "
+                  style={{
+                    backgroundColor: variant.color,
+                  }}
+                />
+
+                <span className="font-medium">
+                  {variant.name || "New Variant"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                  Stock: {variant.stock}
+                </span>
+
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    setVariants((prev) => prev.filter((_, i) => i !== index));
+                  }}
+                  className="
+                    p-2
+                    rounded-lg
+                    hover:bg-red-500/10
+                    transition
+                    cursor-pointer
+                  "
+                >
+                  <Trash2
+                    className="
+                      w-4
+                      h-4
+                      text-red-500
+                    "
+                  />
+                </div>
+              </div>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent
+              className="
+                p-6
+                space-y-4
+              "
+            >
+              <input
+                type="text"
+                placeholder="Variant name"
+                value={variant.name}
+                onChange={(e) => {
+                  const updated = [...variants];
+
+                  updated[index].name = e.target.value;
+
+                  setVariants(updated);
+                }}
+                className="
+                  w-full
+                  border
+                  border-border
+                  rounded-xl
+                  px-4
+                  py-3
+                "
+              />
+
+              <input
+                type="color"
+                value={variant.color}
+                onChange={(e) => {
+                  const updated = [...variants];
+
+                  updated[index].color = e.target.value;
+
+                  setVariants(updated);
+                }}
+                className="
+                    w-20
+                    h-12
+                    rounded-xl
+                    border
+                    border-border
+                    cursor-pointer
+                  "
+              />
+
+              <input
+                type="number"
+                placeholder="Stock"
+                value={variant.stock}
+                onChange={(e) => {
+                  const updated = [...variants];
+
+                  updated[index].stock = Number(e.target.value);
+
+                  setVariants(updated);
+                }}
+                className="
+                  w-full
+                  border
+                  border-border
+                  rounded-xl
+                  px-4
+                  py-3
+                "
+              />
+              <label className="block mb-2 text-sm font-medium">Variant Image</label>
+              <ImageUpload
+                onUpload={(url) => {
+                  const updated = [...variants];
+
+                  updated[index].images.push(url);
+
+                  setVariants(updated);
+                }}
+              />
+
+              <div className="grid grid-cols-3 gap-4">
+                {variant.images.map((image) => (
+                  <div
+                    key={image}
+                    className="
+                      relative
+                      aspect-square
+                      rounded-xl
+                      overflow-hidden
+                    "
+                  >
+                    <Image
+                      src={image}
+                      alt="Variant"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ))}
+
+        <input type="hidden" name="variants" value={JSON.stringify(variants)} />
       </div>
       <MagneticButton
         type="submit"

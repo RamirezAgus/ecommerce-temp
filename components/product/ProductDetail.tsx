@@ -3,31 +3,22 @@
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { Product, Variant } from "@/types/product";
+
 import MagneticButton from "@/components/ui/MagneticButton";
 import ProductGallery from "@/components/product/ProductGallery";
 
-type Variant = {
-  name: string;
-  images: string[];
-};
-
-type Product = {
-  id: string;
-  name: string;
-  subtitle?: string | null;
-  price: number;
-  images: string[];
-  description: string;
-
-  variants?: unknown;
-};
-
 export default function ProductDetail({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
+
   const addItem = useCartStore((state) => state.addItem);
+
   const variants = (product.variants || []) as Variant[];
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+
+  const isOutOfStock = selectedVariant && (selectedVariant.stock ?? 0) <= 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -62,30 +53,67 @@ export default function ProductDetail({ product }: { product: Product }) {
                   key={variant.name}
                   onClick={() => setSelectedVariant(variant)}
                   className={`
-                  px-4
-                  py-2
-                  rounded-full
-                  border
-                  transition-all
-                  duration-300
-                  ${
-                    selectedVariant?.name === variant.name
-                      ? "border-primary bg-primary text-white"
-                      : "border-border hover:border-primary"
-                  }
-                `}
+                    relative
+                    w-10
+                    h-10
+                    rounded-full
+                    border-2
+                    transition-all
+                    duration-300
+                    hover:scale-110
+                    ${
+                      selectedVariant?.name === variant.name
+                        ? "border-primary scale-110"
+                        : "border-border"
+                    }
+                  `}
+                  title={variant.name}
                 >
-                  {variant.name}
+                  <span
+                    className="
+                      absolute
+                      inset-1
+                      rounded-full
+                    "
+                    style={{
+                      backgroundColor: variant.color,
+                    }}
+                  />
                 </button>
               ))}
             </div>
+
+            {selectedVariant && (
+              <p
+                className={`
+                  mt-4
+                  text-sm
+                  font-medium
+                  ${
+                    (selectedVariant.stock ?? 0) > 0
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }
+                `}
+              >
+                {(selectedVariant.stock ?? 0) > 0
+                  ? `${selectedVariant.stock ?? 0} available`
+                  : "Out of stock"}
+              </p>
+            )}
           </div>
         )}
 
         <div className="flex items-center gap-3 mt-6">
           <button
             onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-            className="px-3 py-1 border border-border rounded"
+            className="
+              px-3
+              py-1
+              border
+              border-border
+              rounded
+            "
           >
             -
           </button>
@@ -94,7 +122,13 @@ export default function ProductDetail({ product }: { product: Product }) {
 
           <button
             onClick={() => setQuantity((prev) => prev + 1)}
-            className="px-3 py-1 border border-border rounded"
+            className="
+              px-3
+              py-1
+              border
+              border-border
+              rounded
+            "
           >
             +
           </button>
@@ -102,25 +136,36 @@ export default function ProductDetail({ product }: { product: Product }) {
 
         <div className="mt-6">
           <MagneticButton
+            disabled={!!isOutOfStock}
             className="
               bg-primary
-            text-white
+              text-white
               px-6
               py-3
               rounded-2xl
-              "
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+            "
             onClick={() => {
+              if (isOutOfStock) return;
+
               addItem({
-                id: product.id,
+                id: selectedVariant
+                  ? `${product.id}-${selectedVariant.name}`
+                  : product.id,
                 name: product.name,
+                variant: selectedVariant?.name || null,
                 price: product.price,
-                image: product.images?.[0] || "/placeholder.webp",
+                image:
+                  selectedVariant?.images?.[0] ||
+                  product.images?.[0] ||
+                  "/placeholder.webp",
               });
 
               toast.success(`${product.name} added to cart`);
             }}
           >
-            Add to Cart
+            {isOutOfStock ? "Out of stock" : "Add to Cart"}
           </MagneticButton>
         </div>
 
@@ -128,6 +173,7 @@ export default function ProductDetail({ product }: { product: Product }) {
           <h3 className="text-lg font-semibold text-foreground mb-2">
             Description
           </h3>
+
           <p className="text-muted leading-relaxed">{product.description}</p>
         </div>
       </div>

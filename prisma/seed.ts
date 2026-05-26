@@ -66,11 +66,15 @@ async function main() {
         {
           name: "Verde",
 
+          color: "#5B7C63",
+
           images: ["https://res.cloudinary.com/dx7jgyz9f/image/upload/v1779385816/bolsagreen_bsqw1m.webp",],
         },
 
         {
           name: "Blanco",
+
+          color: "#F5F2EB",
 
           images: ["https://res.cloudinary.com/dx7jgyz9f/image/upload/v1779385816/bolsawhite_tamw7n.webp",],
         },

@@ -36,3 +36,19 @@ model Category {
 
   products  Product[]
 }
+
+model Order {
+  id            String   @id @default(cuid())
+
+  email         String?
+
+  total         Float
+
+  status        String   @default("pending")
+
+  paymentId     String?
+
+  items         Json
+
+  createdAt     DateTime @default(now())
+}
