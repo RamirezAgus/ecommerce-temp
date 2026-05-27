@@ -1,7 +1,6 @@
 "use client";
 
-import CartItem from "./CartItem";
-import MagneticButton from "@/components/ui/MagneticButton";
+import { useState } from "react";
 
 import {
   Sheet,
@@ -16,10 +15,13 @@ import { useCartStore } from "@/store/cartStore";
 
 import { motion } from "framer-motion";
 
+import CartItem from "./CartItem";
+import MagneticButton from "@/components/ui/MagneticButton";
+
 export default function CartDrawer() {
   const items = useCartStore((state) => state.items);
 
-  const removeItem = useCartStore((state) => state.removeItem);
+  const [email, setEmail] = useState("");
 
   const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -36,6 +38,7 @@ export default function CartDrawer() {
 
       body: JSON.stringify({
         items,
+        email,
       }),
     });
 
@@ -104,6 +107,21 @@ export default function CartDrawer() {
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
+          <input
+            type="email"
+            placeholder="Your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="
+                w-full
+                border
+                border-border
+                rounded-xl
+                px-4
+                py-3
+                bg-background
+              "
+          />
           <MagneticButton
             onClick={handleCheckout}
             className="

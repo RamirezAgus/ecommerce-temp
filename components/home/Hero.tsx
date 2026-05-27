@@ -1,7 +1,6 @@
 "use client";
 
 import Container from "@/components/ui/Container";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -36,11 +35,21 @@ export default function Hero() {
                   py-3
                   rounded-2xl"
               >
-                <Link href="/shop">
-                  Shop Collection
-                </Link>
+                <Link href="/shop">Shop Collection</Link>
               </MagneticButton>
-              <Button variant="outline">Learn More</Button>
+              <MagneticButton
+                className="
+                  border
+                  border-border
+                  px-6
+                  py-3
+                  rounded-2xl
+                  hover:bg-muted
+                  transition
+                "
+              >
+                Learn More
+              </MagneticButton>
             </div>
           </div>
 
@@ -63,6 +72,7 @@ export default function Hero() {
               src="/heroimg.webp"
               alt="Hero product"
               fill
+              sizes="100vw"
               className="object-cover rounded-xl"
               priority
             />

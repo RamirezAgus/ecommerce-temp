@@ -27,4 +27,6 @@ export type OrderItem = {
   image: string;
   quantity: number;
   price: number;
+  variantName?: string;
+  variantColor?: string;
 };

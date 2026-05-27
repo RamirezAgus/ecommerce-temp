@@ -7,13 +7,14 @@ type CartItem = {
   price: number;
   image: string;
   quantity: number;
-  variant?: string | null;
+  variantName?: string;
+  variantColor?: string;
 };
 
 type CartStore = {
   items: CartItem[];
 
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   increaseQty: (id: string) => void;
   decreaseQty: (id: string) => void;
@@ -38,7 +39,7 @@ export const useCartStore = create<CartStore>()(
           }
 
           return {
-            items: [...state.items, { ...item, quantity: 1 }],
+            items: [...state.items, item],
           };
         }),
 

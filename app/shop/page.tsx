@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
+
 import Container from "@/components/ui/Container";
 import FiltersSidebar from "@/components/shop/FiltersSidebar";
 import ProductsGrid from "@/components/shop/ProductsGrid";
 import SearchAndSort from "@/components/shop/SearchAndSort";
+import { Variant } from "@/types/product";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = {
+  title: "Shop | Annette Tramas",
+
+  description: "Explore handmade crochet products and decor.",
+};
 
 type Props = {
   searchParams: Promise<{
@@ -15,7 +24,7 @@ type Props = {
 export default async function ShopPage({ searchParams }: Props) {
   const { category, q, sort } = await searchParams;
 
-  const products = await prisma.product.findMany({
+  const rawProducts = await prisma.product.findMany({
     where: {
       ...(category && {
         category: {
@@ -50,6 +59,14 @@ export default async function ShopPage({ searchParams }: Props) {
       category: true,
     },
   });
+
+  const products = rawProducts.map((product) => ({
+    ...product,
+
+    images: (product.images as string[]) || [],
+
+    variants: (product.variants as Variant[]) || [],
+  }));
 
   const categories = await prisma.category.findMany();
 

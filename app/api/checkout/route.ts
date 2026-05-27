@@ -12,7 +12,7 @@ type CartItem = {
 
 export async function POST(req: Request) {
   try {
-    const body: { items: CartItem[] } = await req.json();
+    const body: { items: CartItem[]; email: string } = await req.json();
 
     const total = body.items.reduce(
       (acc, item) => acc + item.price * item.quantity,
@@ -23,6 +23,8 @@ export async function POST(req: Request) {
     const order = await prisma.order.create({
       data: {
         total,
+
+        email: body.email,
 
         items: body.items,
 

@@ -1,16 +1,8 @@
 "use client";
 
 import ProductCard from "@/components/product/ProductCard";
+import { Product } from "@/types/product";
 import { motion } from "framer-motion";
-
-type Product = {
-  id: string;
-  name: string;
-  subtitle: string | null;
-  description: string;
-  price: number;
-  image: string;
-};
 
 type Props = {
   products: Product[];

@@ -18,6 +18,8 @@ export default function ProductDetail({ product }: { product: Product }) {
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
+  const currentStock = selectedVariant?.stock ?? null;
+
   const isOutOfStock = selectedVariant && (selectedVariant.stock ?? 0) <= 0;
 
   return (
@@ -42,6 +44,39 @@ export default function ProductDetail({ product }: { product: Product }) {
         <p className="text-2xl font-semibold mt-4 text-foreground">
           ${product.price}
         </p>
+
+        {selectedVariant && (
+          <div className="mt-3">
+            {currentStock === 0 ? (
+              <p
+                className="
+                text-red-500
+                font-medium
+              "
+              >
+                Out of stock
+              </p>
+            ) : currentStock && currentStock <= 3 ? (
+              <p
+                className="
+                text-yellow-500
+                font-medium
+              "
+              >
+                Only {currentStock} left
+              </p>
+            ) : (
+              <p
+                className="
+                text-green-500
+                font-medium
+              "
+              >
+                In stock
+              </p>
+            )}
+          </div>
+        )}
 
         {variants.length > 0 && (
           <div className="mt-6">
@@ -136,7 +171,9 @@ export default function ProductDetail({ product }: { product: Product }) {
 
         <div className="mt-6">
           <MagneticButton
-            disabled={!!isOutOfStock}
+            disabled={
+              (variants.length > 0 && !selectedVariant) || currentStock === 0
+            }
             className="
               bg-primary
               text-white
@@ -147,19 +184,26 @@ export default function ProductDetail({ product }: { product: Product }) {
               disabled:cursor-not-allowed
             "
             onClick={() => {
-              if (isOutOfStock) return;
+              if (variants.length > 0 && !selectedVariant) {
+                toast.error("Select a variant first");
+
+                return;
+              }
 
               addItem({
-                id: selectedVariant
-                  ? `${product.id}-${selectedVariant.name}`
-                  : product.id,
+                id: product.id,
                 name: product.name,
-                variant: selectedVariant?.name || null,
                 price: product.price,
                 image:
                   selectedVariant?.images?.[0] ||
                   product.images?.[0] ||
                   "/placeholder.webp",
+
+                quantity,
+
+                variantName: selectedVariant?.name,
+
+                variantColor: selectedVariant?.color,
               });
 
               toast.success(`${product.name} added to cart`);

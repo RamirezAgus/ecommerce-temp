@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Product } from "@/types/product";
 
-
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/product/${product.id}`}>
@@ -22,6 +21,11 @@ export default function ProductCard({ product }: { product: Product }) {
             src={product.images?.[0] || "/placeholder.webp"}
             alt={product.name}
             fill
+            sizes="
+              (max-width: 768px) 50vw,
+              (max-width: 1200px) 33vw,
+              25vw
+            "
             className="object-cover
           transition-all
           duration-700
@@ -34,6 +38,11 @@ export default function ProductCard({ product }: { product: Product }) {
               src={product.images[1]}
               alt={product.name}
               fill
+              sizes="
+                (max-width: 768px) 50vw,
+                (max-width: 1200px) 33vw,
+                25vw
+              "
               className="
               object-cover
               opacity-0
