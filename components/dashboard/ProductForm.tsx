@@ -93,14 +93,42 @@ export default function ProductForm({ product, categories }: Props) {
             <div
               key={image}
               className="
-                  relative
-                  aspect-square
-                  rounded-xl
-                  overflow-hidden
-                  border
-                "
+                relative
+                aspect-square
+                rounded-xl
+                overflow-hidden
+                border
+              "
             >
-              <Image src={image} alt="Preview" fill className="object-cover" />
+              <Image
+                src={image}
+                alt="Preview"
+                fill
+                sizes="200px"
+                className="object-cover"
+              />
+
+              <button
+                type="button"
+                onClick={() =>
+                  setImages((prev) => prev.filter((img) => img !== image))
+                }
+                className="
+                  absolute
+                  top-2
+                  right-2
+                  w-8
+                  h-8
+                  rounded-full
+                  bg-black/70
+                  text-white
+                  text-sm
+                  hover:bg-red-500
+                  transition
+                "
+              >
+                ✕
+              </button>
             </div>
           ))}
         </div>
@@ -273,7 +301,9 @@ export default function ProductForm({ product, categories }: Props) {
                   py-3
                 "
               />
-              <label className="block mb-2 text-sm font-medium">Variant Image</label>
+              <label className="block mb-2 text-sm font-medium">
+                Variant Image
+              </label>
               <ImageUpload
                 onUpload={(url) => {
                   const updated = [...variants];
@@ -299,8 +329,37 @@ export default function ProductForm({ product, categories }: Props) {
                       src={image}
                       alt="Variant"
                       fill
+                      sizes="200px"
                       className="object-cover"
                     />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = [...variants];
+
+                        updated[index].images = updated[index].images.filter(
+                          (img) => img !== image,
+                        );
+
+                        setVariants(updated);
+                      }}
+                      className="
+                        absolute
+                        top-2
+                        right-2
+                        w-8
+                        h-8
+                        rounded-full
+                        bg-black/70
+                        text-white
+                        text-sm
+                        hover:bg-red-500
+                        transition
+                      "
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
               </div>

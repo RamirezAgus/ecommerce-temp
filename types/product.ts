@@ -14,6 +14,7 @@ export type Product = {
   images: string[];
   variants?: Variant[];
   categoryId?: string | null;
+  createdAt: Date;
 };
 
 export type Category = {

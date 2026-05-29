@@ -19,12 +19,14 @@ export default function Hero() {
             <p className="text-sm text-muted mb-3">ELEVATE YOUR SPACE</p>
 
             <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Discover curated objects for modern living
+              Decoración y tejidos artesanales, con tramas hechas con amor.
             </h1>
 
             <p className="mt-4 text-muted max-w-md">
-              Explore our selection of premium lifestyle goods designed to
-              enhance your everyday experience.
+              Creamos productos decorativos y accesorios tejidos con diseño y detalles hechos a mano.
+            </p>
+            <p className="mt-4 text-muted max-w-md">
+              Tambien brindamos clases de tejido y ofrecemos hilados seleccionados para crear proyectos unicos.
             </p>
 
             <div className="flex gap-4 mt-6">

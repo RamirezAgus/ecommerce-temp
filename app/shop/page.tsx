@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import Link from "next/link";
 import Container from "@/components/ui/Container";
 import FiltersSidebar from "@/components/shop/FiltersSidebar";
 import ProductsGrid from "@/components/shop/ProductsGrid";
@@ -18,11 +19,18 @@ type Props = {
     category?: string;
     q?: string;
     sort?: string;
+    page?: string;
   }>;
 };
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { category, q, sort } = await searchParams;
+  const { category, q, sort, page } = await searchParams;
+
+  const currentPage = Number(page) || 1;
+
+  const PRODUCTS_PER_PAGE = 8;
+
+  const skip = (currentPage - 1) * PRODUCTS_PER_PAGE;
 
   const rawProducts = await prisma.product.findMany({
     where: {
@@ -55,6 +63,9 @@ export default async function ShopPage({ searchParams }: Props) {
               }
             : undefined,
 
+    skip,
+    take: PRODUCTS_PER_PAGE,
+
     include: {
       category: true,
     },
@@ -69,6 +80,25 @@ export default async function ShopPage({ searchParams }: Props) {
   }));
 
   const categories = await prisma.category.findMany();
+
+  const totalProducts = await prisma.product.count({
+    where: {
+      ...(category && {
+        category: {
+          name: category,
+        },
+      }),
+
+      ...(q && {
+        name: {
+          contains: q,
+          mode: "insensitive",
+        },
+      }),
+    },
+  });
+
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
   return (
     <Container>
@@ -85,6 +115,45 @@ export default async function ShopPage({ searchParams }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-6">
           <FiltersSidebar categories={categories} currentCategory={category} />
           <ProductsGrid products={products} />
+          <div
+            className="
+              flex
+              items-center
+              justify-center
+              gap-2
+              mt-10
+            "
+          >
+            {Array.from({
+              length: totalPages,
+            }).map((_, index) => {
+              const pageNumber = index + 1;
+
+              return (
+                <Link
+                  key={pageNumber}
+                  href={`/shop?page=${pageNumber}${
+                    category ? `&category=${category}` : ""
+                  }${q ? `&q=${q}` : ""}${sort ? `&sort=${sort}` : ""}`}
+                  className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    border
+                    transition
+
+                    ${
+                      currentPage === pageNumber
+                        ? "bg-primary text-white border-primary"
+                        : "hover:bg-muted"
+                    }
+                  `}
+                >
+                  {pageNumber}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </Container>

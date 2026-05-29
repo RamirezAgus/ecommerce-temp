@@ -40,21 +40,17 @@ export default function Navbar() {
           <Link href="/" className="relative flex items-center">
             <div className="absolute inset-0 bg-linear-to-r from-amber-800/10 via-transparent to-amber-700/10 blur-2xl rounded-full" />
             <Image
-              src="/logo.webp"
+              src="/logo1.png"
               alt="Annette Tramas"
-              width={160}
-              height={60}
+              width={170}
+              height={70}
               priority
               className="relative
               w-auto
-              h-15
+              h-20
               rounded-md
               object-contain
-              opacity-90
-              hover:opacity-100
-              transition-all
-              duration-300
-              drop-shadow-[0_2px_10px_rgba(120,72,32,0.22)]"
+              "
             />
           </Link>
 
@@ -106,3 +102,9 @@ export default function Navbar() {
     </motion.header>
   );
 }
+
+{/*opacity-90
+              hover:opacity-100
+              transition-all
+              duration-300
+              drop-shadow-[0_2px_10px_rgba(120,72,32,0.22)] */}

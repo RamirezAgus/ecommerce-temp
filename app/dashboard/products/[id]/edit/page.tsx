@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import ProductForm from "@/components/dashboard/ProductForm";
 import { prisma } from "@/lib/prisma";
+import { Variant } from "@/types/product";
+import ProductForm from "@/components/dashboard/ProductForm";
 
 export default async function EditProductPage({
   params,
@@ -10,14 +11,18 @@ export default async function EditProductPage({
   const { id } = await params;
 
   const product = await prisma.product.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
-  if (!product) {
-    return notFound();
-  }
+  if (!product) return notFound();
+
+  const formattedProduct = {
+    ...product,
+
+    images: (product?.images as string[]) || [],
+
+    variants: (product?.variants as Variant[]) || [],
+  };
 
   const categories = await prisma.category.findMany();
 
@@ -25,7 +30,7 @@ export default async function EditProductPage({
     <div>
       <h1 className="text-3xl font-bold mb-8">Edit Product</h1>
 
-      <ProductForm product={product} categories={categories} />
+      <ProductForm product={formattedProduct} categories={categories} />
     </div>
   );
 }
