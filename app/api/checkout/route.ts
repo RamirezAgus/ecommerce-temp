@@ -102,14 +102,14 @@ export async function POST(req: Request) {
         })),
 
         notification_url:
-          "https://https://annette-tramas.vercel.app/api/webhooks/mercadopago",
+          `${siteUrl}/api/webhooks/mercadopago`,
 
         back_urls: {
-          success: "https://https://annette-tramas.vercel.app/success",
+          success: `${siteUrl}/success`,
 
-          failure: "https://https://annette-tramas.vercel.app/failure",
+          failure: `${siteUrl}/failure`,
 
-          pending: "https://https://annette-tramas.vercel.app/pending",
+          pending: `${siteUrl}/pending`,
         },
 
         auto_return: "approved",
