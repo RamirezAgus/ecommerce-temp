@@ -12,6 +12,8 @@ type CartItem = {
   variantName?: string;
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+
 export async function POST(req: Request) {
   try {
     const body: { items: CartItem[]; email: string } = await req.json();
@@ -100,14 +102,14 @@ export async function POST(req: Request) {
         })),
 
         notification_url:
-          "https://decline-financial-bovine.ngrok-free.dev/api/webhooks/mercadopago",
+          "https://https://annette-tramas.vercel.app/api/webhooks/mercadopago",
 
         back_urls: {
-          success: "https://decline-financial-bovine.ngrok-free.dev/success",
+          success: "https://https://annette-tramas.vercel.app/success",
 
-          failure: "https://decline-financial-bovine.ngrok-free.dev/failure",
+          failure: "https://https://annette-tramas.vercel.app/failure",
 
-          pending: "https://decline-financial-bovine.ngrok-free.dev/pending",
+          pending: "https://https://annette-tramas.vercel.app/pending",
         },
 
         auto_return: "approved",
