@@ -11,6 +11,8 @@ type Props = {
     image: string;
     price: number;
     quantity: number;
+    variantName?: string;
+    variantColor?: string;
   };
 };
 
@@ -32,12 +34,16 @@ export default function CartItem({ item }: Props) {
       <div className="flex-1">
         <h3 className="font-medium">{item.name}</h3>
 
+        {item.variantName && (
+          <p className="text-sm text-muted">{item.variantName}</p>
+        )}
+
         <p className="font-semibold mt-1">${item.price}</p>
 
         {/* Quantity */}
         <div className="flex items-center gap-3 mt-3">
           <button
-            onClick={() => decreaseQty(item.id)}
+            onClick={() => decreaseQty(item.id, item.variantName)}
             className="w-8 h-8 border border-border rounded-md"
           >
             -
@@ -46,7 +52,7 @@ export default function CartItem({ item }: Props) {
           <span>{item.quantity}</span>
 
           <button
-            onClick={() => increaseQty(item.id)}
+            onClick={() => increaseQty(item.id, item.variantName)}
             className="w-8 h-8 border border-border rounded-md"
           >
             +
@@ -55,7 +61,7 @@ export default function CartItem({ item }: Props) {
 
         {/* Remove */}
         <button
-          onClick={() => removeItem(item.id)}
+          onClick={() => removeItem(item.id, item.variantName)}
           className="text-sm text-red-500 mt-3"
         >
           Remove

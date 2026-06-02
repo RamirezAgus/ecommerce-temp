@@ -7,6 +7,7 @@ type CartItem = {
   price: number;
   image: string;
   quantity: number;
+  stock?: number;
   variantName?: string;
   variantColor?: string;
 };
@@ -15,9 +16,11 @@ type CartStore = {
   items: CartItem[];
 
   addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  increaseQty: (id: string) => void;
-  decreaseQty: (id: string) => void;
+  removeItem: (id: string, variantName?: string) => void;
+
+  increaseQty: (id: string, variantName?: string) => void;
+
+  decreaseQty: (id: string, variantName?: string) => void;
   clearCart: () => void;
 };
 
@@ -28,12 +31,16 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) =>
         set((state) => {
-          const existing = state.items.find((i) => i.id === item.id);
+          const existing = state.items.find(
+            (i) => i.id === item.id && i.variantName === item.variantName,
+          );
 
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i,
+                i.id === item.id && i.variantName === item.variantName
+                  ? { ...i, quantity: i.quantity + 1 }
+                  : i,
               ),
             };
           }
@@ -43,22 +50,36 @@ export const useCartStore = create<CartStore>()(
           };
         }),
 
-      removeItem: (id) =>
+      removeItem: (id, variantName) =>
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
-        })),
-
-      increaseQty: (id) =>
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
+          items: state.items.filter(
+            (i) => !(i.id === id && i.variantName === variantName),
           ),
         })),
 
-      decreaseQty: (id) =>
+      increaseQty: (id, variantName) =>
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.id === id && i.variantName === variantName
+              ? {
+                  ...i,
+                  quantity: Math.min(i.quantity + 1, i.stock ?? Infinity),
+                }
+              : i,
+          ),
+        })),
+
+      decreaseQty: (id, variantName) =>
         set((state) => ({
           items: state.items
-            .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
+            .map((i) =>
+              i.id === id && i.variantName === variantName
+                ? {
+                    ...i,
+                    quantity: i.quantity - 1,
+                  }
+                : i,
+            )
             .filter((i) => i.quantity > 0),
         })),
 

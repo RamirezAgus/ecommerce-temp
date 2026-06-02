@@ -86,7 +86,10 @@ export default function ProductDetail({ product }: { product: Product }) {
               {variants.map((variant) => (
                 <button
                   key={variant.name}
-                  onClick={() => setSelectedVariant(variant)}
+                  onClick={() => {
+                    setSelectedVariant(variant);
+                    setQuantity(1);
+                  }}
                   className={`
                     relative
                     w-10
@@ -156,7 +159,15 @@ export default function ProductDetail({ product }: { product: Product }) {
           <span className="text-foreground">{quantity}</span>
 
           <button
-            onClick={() => setQuantity((prev) => prev + 1)}
+            onClick={() =>
+              setQuantity((prev) => {
+                if (!selectedVariant) {
+                  return prev + 1;
+                }
+
+                return Math.min(prev + 1, selectedVariant.stock ?? 0);
+              })
+            }
             className="
               px-3
               py-1
@@ -190,10 +201,17 @@ export default function ProductDetail({ product }: { product: Product }) {
                 return;
               }
 
+              if (selectedVariant && quantity > (selectedVariant.stock ?? 0)) {
+                toast.error("Not enough stock");
+
+                return;
+              }
+
               addItem({
                 id: product.id,
                 name: product.name,
                 price: product.price,
+                stock: selectedVariant?.stock,
                 image:
                   selectedVariant?.images?.[0] ||
                   product.images?.[0] ||

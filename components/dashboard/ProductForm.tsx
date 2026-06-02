@@ -280,7 +280,7 @@ export default function ProductForm({ product, categories }: Props) {
                     cursor-pointer
                   "
               />
-
+                <p className="text-sm font-medium">Stock</p>
               <input
                 type="number"
                 placeholder="Stock"
