@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
-const ALLOWED_EMAIL = "rlagustin0@gmail.com"; // ← tu email acá
+const ALLOWED_EMAIL = "rlagustin0@gmail.com";
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
@@ -16,7 +16,7 @@ export default clerkMiddleware(async (auth, req) => {
     const email = sessionClaims?.email as string;
 
     if (email !== ALLOWED_EMAIL) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }
 });
