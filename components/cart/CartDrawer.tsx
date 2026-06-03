@@ -23,29 +23,35 @@ export default function CartDrawer() {
 
   const [email, setEmail] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
   const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
 
   const handleCheckout = async () => {
-    const response = await fetch("/api/checkout", {
-      method: "POST",
+    if (!email || items.length === 0) return;
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+    setLoading(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items, email }),
+      });
 
-      body: JSON.stringify({
-        items,
-        email,
-      }),
-    });
+      const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.init_point) {
-      window.location.href = data.init_point;
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert("Error al procesar el pago");
+      }
+    } catch {
+      alert("Error al conectar con el servidor");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,7 +142,7 @@ export default function CartDrawer() {
             font-medium
           "
           >
-            Go to Checkout
+            {loading ? "Procesando..." : "Go to Checkout"}
           </MagneticButton>
         </div>
       </SheetContent>
