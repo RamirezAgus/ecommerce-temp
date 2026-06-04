@@ -104,7 +104,7 @@ export async function POST(req: Request) {
           failure: `${siteUrl}/failure`,
           pending: `${siteUrl}/pending`,
         },
-        auto_return: "approved",
+       auto_return: "approved",
       },
     });
 
