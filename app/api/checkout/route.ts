@@ -88,30 +88,22 @@ export async function POST(req: Request) {
     const result = await preference.create({
       body: {
         external_reference: order.id,
-
         items: body.items.map((item: CartItem) => ({
           id: item.id,
-
           title: item.name,
-
           quantity: item.quantity,
-
           unit_price: item.price,
-
           currency_id: "ARS",
         })),
-
-        notification_url:
-          `${siteUrl}/api/webhooks/mercadopago`,
-
+        payer: {
+          email: body.email,
+        },
+        notification_url: `${siteUrl}/api/webhooks/mercadopago`,
         back_urls: {
           success: `${siteUrl}/success`,
-
           failure: `${siteUrl}/failure`,
-
           pending: `${siteUrl}/pending`,
         },
-
         auto_return: "approved",
       },
     });
