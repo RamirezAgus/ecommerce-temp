@@ -92,6 +92,7 @@ export default function Navbar() {
                     <button
                       onClick={async () => {
                         await authClient.signOut();
+                        window.location.href = "/";
                       }}
                       className="text-sm hover:opacity-70 transition"
                     >
@@ -100,7 +101,7 @@ export default function Navbar() {
                   </>
                 ) : (
                   <Link
-                    href="/login"
+                    href="/sign-in"
                     className="text-sm hover:opacity-70 transition"
                   >
                     Login
