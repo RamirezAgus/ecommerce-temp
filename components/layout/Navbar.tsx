@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import CartDrawer from "@/components/cart/CartDrawer";
-import { UserButton, SignInButton, Show } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,26 +77,37 @@ export default function Navbar() {
           {/* Actions */}
           <div className="flex items-center gap-5">
             <CartDrawer />
-            <Show
-              when="signed-out"
-              fallback={
-                <div className="flex items-center gap-4">
+
+            {!isPending && (
+              <>
+                {session ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      className="text-sm hover:opacity-70 transition"
+                    >
+                      Dashboard
+                    </Link>
+
+                    <button
+                      onClick={async () => {
+                        await authClient.signOut();
+                      }}
+                      className="text-sm hover:opacity-70 transition"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
                   <Link
-                    href="/dashboard"
+                    href="/login"
                     className="text-sm hover:opacity-70 transition"
                   >
-                    Dashboard
+                    Login
                   </Link>
-                  <UserButton />
-                </div>
-              }
-            >
-              <SignInButton>
-                <button className="text-sm hover:opacity-70 transition">
-                  Login
-                </button>
-              </SignInButton>
-            </Show>
+                )}
+              </>
+            )}
           </div>
         </div>
       </Container>
@@ -103,8 +115,10 @@ export default function Navbar() {
   );
 }
 
-{/*opacity-90
+{
+  /*opacity-90
               hover:opacity-100
               transition-all
               duration-300
-              drop-shadow-[0_2px_10px_rgba(120,72,32,0.22)] */}
+              drop-shadow-[0_2px_10px_rgba(120,72,32,0.22)] */
+}
