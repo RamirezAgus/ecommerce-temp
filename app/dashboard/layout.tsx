@@ -8,6 +8,7 @@ import {
   PlusSquare,
   ShoppingBag,
   Tag,
+  Settings,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -42,6 +43,11 @@ export default function DashboardLayout({
       label: "Categories",
       href: "/dashboard/categories",
       icon: Tag,
+    },
+    {
+      label: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings, // agregá Settings al import de lucide-react
     },
   ];
 
