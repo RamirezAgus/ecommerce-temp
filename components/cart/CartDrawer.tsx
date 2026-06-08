@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-
 import {
   Sheet,
   SheetContent,
@@ -9,20 +8,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-
 import { motion } from "framer-motion";
-
 import CartItem from "./CartItem";
 import MagneticButton from "@/components/ui/MagneticButton";
+import {
+  getShippingCost,
+  getShippingZone,
+  SHIPPING_LABELS,
+} from "@/lib/shipping";
 
 export default function CartDrawer() {
   const items = useCartStore((state) => state.items);
-
   const [email, setEmail] = useState("");
-
+  const [zipCode, setZipCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const subtotal = items.reduce(
@@ -30,15 +30,23 @@ export default function CartDrawer() {
     0,
   );
 
+  const shippingCost = zipCode.length >= 4 ? getShippingCost(zipCode) : 0;
+  const shippingZone = zipCode.length >= 4 ? getShippingZone(zipCode) : null;
+  const total = subtotal + shippingCost;
+
   const handleCheckout = async () => {
     if (!email || items.length === 0) return;
+    if (!zipCode || zipCode.length < 4) {
+      alert("Ingresá tu código postal");
+      return;
+    }
 
     setLoading(true);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, email }),
+        body: JSON.stringify({ items, email, zipCode }),
       });
 
       const data = await response.json();
@@ -69,21 +77,12 @@ export default function CartDrawer() {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="flex
-            flex-col
-            w-full
-            sm:max-w-lg
-            border-l
-            border-border
-            bg-background/95
-            backdrop-blur-xl
-            animate-in
-            slide-in-from-right
-            duration-300"
+        className="flex flex-col w-full sm:max-w-lg border-l border-border bg-background/95 backdrop-blur-xl animate-in slide-in-from-right duration-300"
       >
         <SheetHeader>
           <SheetTitle>Your Cart</SheetTitle>
         </SheetHeader>
+
         <div className="flex-1 overflow-y-auto mt-6 space-y-4">
           {items.length === 0 ? (
             <p className="text-muted">Your cart is empty</p>
@@ -91,56 +90,64 @@ export default function CartDrawer() {
             items.map((item) => (
               <motion.div
                 key={item.id}
-                initial={{
-                  opacity: 0,
-                  x: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                }}
-                transition={{
-                  duration: 0.25,
-                }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25 }}
               >
                 <CartItem item={item} />
               </motion.div>
             ))
           )}
         </div>
+
         <div className="border-t pt-6 space-y-4">
-          <div className="flex justify-between font-semibold text-lg">
+          {/* Subtotal */}
+          <div className="flex justify-between text-sm text-muted">
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
+
+          {/* Código postal */}
+          <div className="font-semibold text-lg">
+            <span>Envío</span>
+          </div>
+          <div className="space-y-1.5">
+            <input
+              type="text"
+              placeholder="Código postal"
+              value={zipCode}
+              maxLength={8}
+              onChange={(e) => setZipCode(e.target.value.replace(/\D/g, ""))}
+              className="w-full border border-border rounded-xl px-4 py-3 bg-background text-sm"
+            />
+            {shippingZone && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted">
+                  Envío — {SHIPPING_LABELS[shippingZone]}
+                </span>
+                <span>${shippingCost.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Total */}
+          <div className="flex justify-between font-semibold text-lg border-t border-border pt-3">
+            <span>Total</span>
+            <span>${total.toFixed(2)}</span>
+          </div>
+
+          {/* Email */}
           <input
             type="email"
-            placeholder="Your email"
+            placeholder="Tu email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="
-                w-full
-                border
-                border-border
-                rounded-xl
-                px-4
-                py-3
-                bg-background
-              "
+            className="w-full border border-border rounded-xl px-4 py-3 bg-background text-sm"
           />
+
           <MagneticButton
             onClick={handleCheckout}
-            className="
-            flex
-            w-full
-            justify-center
-            bg-primary
-            text-white
-            text-center
-            p-3
-            rounded-2xl
-            font-medium
-          "
+            className="flex w-full justify-center bg-primary text-white text-center p-3 rounded-2xl font-medium"
           >
             {loading ? "Procesando..." : "Go to Checkout"}
           </MagneticButton>

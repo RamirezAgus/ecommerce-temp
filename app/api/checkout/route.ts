@@ -3,6 +3,11 @@ import { mercadopago } from "@/lib/mercadopago";
 import { Preference } from "mercadopago";
 import { prisma } from "@/lib/prisma";
 import { Variant } from "@/types/product";
+import {
+  getShippingCost,
+  getShippingZone,
+  SHIPPING_LABELS,
+} from "@/lib/shipping";
 
 type CartItem = {
   id: string;
@@ -16,7 +21,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
 
 export async function POST(req: Request) {
   try {
-    const body: { items: CartItem[]; email: string } = await req.json();
+    const body: { items: CartItem[]; email: string; zipCode: string } =
+      await req.json();
+
+    const shippingCost = getShippingCost(body.zipCode);
+    const shippingZone = getShippingZone(body.zipCode);
 
     for (const item of body.items) {
       const product = await prisma.product.findUnique({
@@ -65,11 +74,9 @@ export async function POST(req: Request) {
       }
     }
 
-    const total = body.items.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-
-      0,
-    );
+    const total =
+      body.items.reduce((acc, item) => acc + item.price * item.quantity, 0) +
+      shippingCost;
 
     const order = await prisma.order.create({
       data: {
@@ -88,13 +95,22 @@ export async function POST(req: Request) {
     const result = await preference.create({
       body: {
         external_reference: order.id,
-        items: body.items.map((item: CartItem) => ({
-          id: item.id,
-          title: item.name,
-          quantity: item.quantity,
-          unit_price: item.price,
-          currency_id: "ARS",
-        })),
+        items: [
+          ...body.items.map((item: CartItem) => ({
+            id: item.id,
+            title: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            currency_id: "ARS",
+          })),
+          {
+            id: "shipping",
+            title: `Envío — ${SHIPPING_LABELS[shippingZone]}`,
+            quantity: 1,
+            unit_price: shippingCost,
+            currency_id: "ARS",
+          },
+        ],
         payer: {
           email: body.email,
         },
@@ -104,7 +120,7 @@ export async function POST(req: Request) {
           failure: `${siteUrl}/failure`,
           pending: `${siteUrl}/pending`,
         },
-       auto_return: "approved",
+        auto_return: "approved",
       },
     });
 
