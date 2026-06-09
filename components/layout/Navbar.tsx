@@ -4,13 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import CartDrawer from "@/components/cart/CartDrawer";
+import AuthButtons from "@/components/layout/AuthButtons";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,38 +76,7 @@ export default function Navbar() {
           {/* Actions */}
           <div className="flex items-center gap-5">
             <CartDrawer />
-
-            {!isPending && (
-              <>
-                {session ? (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      className="text-sm hover:opacity-70 transition"
-                    >
-                      Dashboard
-                    </Link>
-
-                    <button
-                      onClick={async () => {
-                        await authClient.signOut();
-                        window.location.href = "/";
-                      }}
-                      className="text-sm hover:opacity-70 transition"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/sign-in"
-                    className="text-sm hover:opacity-70 transition"
-                  >
-                    Login
-                  </Link>
-                )}
-              </>
-            )}
+            <AuthButtons />
           </div>
         </div>
       </Container>

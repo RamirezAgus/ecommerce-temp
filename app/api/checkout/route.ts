@@ -3,6 +3,7 @@ import { mercadopago } from "@/lib/mercadopago";
 import { Preference } from "mercadopago";
 import { prisma } from "@/lib/prisma";
 import { Variant } from "@/types/product";
+import { ratelimit } from "@/lib/ratelimit";
 import {
   getShippingCost,
   getShippingZone,
@@ -21,42 +22,43 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
 
 export async function POST(req: Request) {
   try {
+    const forwardedFor = req.headers.get("x-forwarded-for");
+
+    const ip = forwardedFor?.split(",")[0] ?? "anonymous";
+
+    const { success } = await ratelimit.limit(ip);
+
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body: { items: CartItem[]; email: string; zipCode: string } =
       await req.json();
 
     const shippingCost = getShippingCost(body.zipCode);
     const shippingZone = getShippingZone(body.zipCode);
 
+    const validatedItems: (CartItem & { realPrice: number })[] = [];
+
     for (const item of body.items) {
       const product = await prisma.product.findUnique({
-        where: {
-          id: item.id,
-        },
+        where: { id: item.id },
       });
 
       if (!product) {
         return NextResponse.json(
-          {
-            error: "Product not found",
-          },
-          {
-            status: 404,
-          },
+          { error: "Product not found" },
+          { status: 404 },
         );
       }
 
       const variants = (product.variants as Variant[]) || [];
-
       const variant = variants.find((v) => v.name === item.variantName);
 
       if (!variant) {
         return NextResponse.json(
-          {
-            error: "Variant not found",
-          },
-          {
-            status: 400,
-          },
+          { error: "Variant not found" },
+          { status: 400 },
         );
       }
 
@@ -64,28 +66,34 @@ export async function POST(req: Request) {
 
       if (item.quantity > stock) {
         return NextResponse.json(
-          {
-            error: `Insufficient stock for ${product.name}`,
-          },
-          {
-            status: 400,
-          },
+          { error: `Insufficient stock for ${product.name}` },
+          { status: 400 },
         );
       }
+
+      validatedItems.push({
+        ...item,
+        realPrice: product.price,
+      });
     }
 
     const total =
-      body.items.reduce((acc, item) => acc + item.price * item.quantity, 0) +
-      shippingCost;
+      validatedItems.reduce(
+        (acc, item) => acc + item.realPrice * item.quantity,
+        0,
+      ) + shippingCost;
 
     const order = await prisma.order.create({
       data: {
         total,
-
         email: body.email,
-
-        items: body.items,
-
+        items: validatedItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.realPrice,
+          variantName: item.variantName,
+        })),
         status: "pending",
       },
     });
@@ -96,11 +104,11 @@ export async function POST(req: Request) {
       body: {
         external_reference: order.id,
         items: [
-          ...body.items.map((item: CartItem) => ({
+          ...validatedItems.map((item) => ({
             id: item.id,
             title: item.name,
             quantity: item.quantity,
-            unit_price: item.price,
+            unit_price: item.realPrice,
             currency_id: "ARS",
           })),
           {
@@ -126,20 +134,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       id: result.id,
-
       init_point: result.init_point,
     });
   } catch (error) {
     console.error(error);
-
     return NextResponse.json(
-      {
-        error: "Error creating checkout",
-      },
-
-      {
-        status: 500,
-      },
+      { error: "Error creating checkout" },
+      { status: 500 },
     );
   }
 }
