@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Variant, OrderItem } from "@/types/product";
+import { sendOrderConfirmation } from "@/lib/email";
 import crypto from "crypto";
 
 function verifyWebhookSignature(
@@ -77,6 +78,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Order not found" });
       }
 
+      if (order.status === "paid") {
+        return NextResponse.json({ ok: true });
+      }
+
       const orderItems = order.items as OrderItem[];
 
       for (const item of orderItems) {
@@ -104,13 +109,21 @@ export async function POST(req: Request) {
         });
       }
 
-      await prisma.order.update({
+      const updatedOrder = await prisma.order.update({
         where: { id: orderId },
         data: {
           status: "paid",
           paymentId: String(paymentId),
         },
       });
+
+      if (updatedOrder.email) {
+        await sendOrderConfirmation({
+          email: updatedOrder.email,
+          orderId: updatedOrder.id,
+          total: updatedOrder.total,
+        });
+      }
     }
 
     return NextResponse.json({ ok: true });
