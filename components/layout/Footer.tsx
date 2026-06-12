@@ -19,7 +19,7 @@ export default function Footer() {
                 href="https://www.instagram.com/annette.tramas/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-foreground transition"
+                className="text-foreground hover:text-foreground/80 transition"
                 aria-label="Instagram"
               >
                 <svg
@@ -43,7 +43,7 @@ export default function Footer() {
                 href="https://www.facebook.com/annette.tramas"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted hover:text-foreground transition"
+                className="text-foreground hover:text-foreground/80 transition"
                 aria-label="Facebook"
               >
                 <svg
